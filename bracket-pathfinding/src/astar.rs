@@ -77,6 +77,8 @@ struct AStar {
     closed_list: HashMap<usize, f32>,
     parents: HashMap<usize, (usize, f32)>, // (index, cost)
     step_counter: usize,
+    // Memoization: Store f-scores of visited nodes
+    f_scores: HashMap<usize, f32>,
 }
 
 impl AStar {
@@ -96,6 +98,7 @@ impl AStar {
             parents: HashMap::new(),
             closed_list: HashMap::new(),
             step_counter: 0,
+            f_scores: HashMap::new(),
         }
     }
 
@@ -112,6 +115,14 @@ impl AStar {
             f: q.g + cost + distance_to_end,
             g: q.g + cost,
         };
+
+        // Check if f-score is already memoized
+        if let Some(&memoized_f) = self.f_scores.get(&idx) {
+            // If memoized f-score is lower or equal, skip adding
+            if memoized_f <= s.f {
+                return;
+            }
+        }
 
         // If a node with the same position as successor is in the open list with a lower f, skip add
         let mut should_add = true;
@@ -130,6 +141,9 @@ impl AStar {
             self.open_list.push(s);
             self.parents.insert(idx, (q.idx, s.g));
         }
+
+        // Store the calculated f-score
+        self.f_scores.insert(idx, s.f);
     }
 
     /// Helper function to unwrap a path once we've found the end-point.
