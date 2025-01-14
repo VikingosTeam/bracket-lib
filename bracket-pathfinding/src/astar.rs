@@ -106,12 +106,6 @@ impl AStar {
 
     /// Adds a successor; if we're at the end, marks success.
     fn add_successor(&mut self, q: Node, idx: usize, cost: f32, map: &dyn BaseMap) {
-        let is_in_closed_list = self.closed_list.contains_key(&idx);
-
-        if is_in_closed_list {
-            return;
-        }
-
         let distance_to_end = self.distance_to_end(idx, map);
         let s = Node {
             idx,
@@ -128,7 +122,7 @@ impl AStar {
         }
 
         // If a node with the same position as successor is in the closed list, with a lower f, skip add
-        if should_add && is_in_closed_list {
+        if should_add && self.closed_list.contains_key(&idx) {
             should_add = false;
         }
 
